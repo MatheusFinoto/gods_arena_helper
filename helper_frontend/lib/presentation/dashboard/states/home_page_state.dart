@@ -10,6 +10,7 @@ class HomePageState extends ChangeNotifier {
   }
 
   bool isLoading = false;
+  bool hideSensitiveData = false;
   String output = 'Nenhum comando executado ainda.';
 
   List<Account> accounts = [];
@@ -28,5 +29,10 @@ class HomePageState extends ChangeNotifier {
 
   void focusAccountWindow(int processId) {
     accountsUsecase.focusAccountWindow(processId);
+  }
+
+  void toggleSensitiveDataVisibility() {
+    hideSensitiveData = !hideSensitiveData;
+    notifyListeners();
   }
 }

@@ -290,6 +290,19 @@ class _AccountsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headerActions = Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _PrivacyToggle(
+          enabled: state.hideSensitiveData,
+          onTap: state.toggleSensitiveDataVisibility,
+        ),
+        _AvailabilityBadge(total: state.accounts.length),
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -327,7 +340,7 @@ class _AccountsPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _AvailabilityBadge(total: state.accounts.length),
+            headerActions,
           ] else
             Row(
               children: [
@@ -355,7 +368,7 @@ class _AccountsPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                _AvailabilityBadge(total: state.accounts.length),
+                headerActions,
               ],
             ),
           const SizedBox(height: 24),
@@ -376,6 +389,7 @@ class _AccountsPanel extends StatelessWidget {
 
                         return _AccountCard(
                           account: account,
+                          hideSensitiveData: state.hideSensitiveData,
                           onOpen: () =>
                               state.focusAccountWindow(account.processId),
                         );
@@ -460,9 +474,14 @@ class _EmptyAccountsState extends StatelessWidget {
 }
 
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.account, required this.onOpen});
+  const _AccountCard({
+    required this.account,
+    required this.hideSensitiveData,
+    required this.onOpen,
+  });
 
   final Account account;
+  final bool hideSensitiveData;
   final VoidCallback onOpen;
 
   Color get _accentColor {
@@ -513,15 +532,9 @@ class _AccountCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Text(
-                            account.nick,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
-                            ),
+                          child: _SensitiveText(
+                            text: account.nick,
+                            hideSensitiveData: hideSensitiveData,
                           ),
                         ),
                       ],
@@ -575,15 +588,9 @@ class _AccountCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            account.nick,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
-                            ),
+                          _SensitiveText(
+                            text: account.nick,
+                            hideSensitiveData: hideSensitiveData,
                           ),
                           const SizedBox(height: 8),
                           Wrap(
@@ -648,6 +655,106 @@ class _AvailabilityBadge extends StatelessWidget {
           color: Color(0xFF1E40AF),
           fontWeight: FontWeight.w700,
         ),
+      ),
+    );
+  }
+}
+
+class _PrivacyToggle extends StatelessWidget {
+  const _PrivacyToggle({
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: enabled
+              ? const Color(0xFFE8F0FF)
+              : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: enabled
+                ? const Color(0xFFC9DBFF)
+                : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              enabled ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+              size: 18,
+              color: enabled
+                  ? const Color(0xFF1E40AF)
+                  : const Color(0xFF475569),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              enabled ? 'Blur para print' : 'Mostrar nicks',
+              style: TextStyle(
+                color: enabled
+                    ? const Color(0xFF1E40AF)
+                    : const Color(0xFF334155),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SensitiveText extends StatelessWidget {
+  const _SensitiveText({
+    required this.text,
+    required this.hideSensitiveData,
+  });
+
+  final String text;
+  final bool hideSensitiveData;
+
+  @override
+  Widget build(BuildContext context) {
+    final textWidget = Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF0F172A),
+      ),
+    );
+
+    if (!hideSensitiveData) return textWidget;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: [
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: textWidget,
+          ),
+          Container(
+            height: 26,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
       ),
     );
   }
