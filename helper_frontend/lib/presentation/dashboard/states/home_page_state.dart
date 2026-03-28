@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:helper_frontend/domain/entities/account.dart';
 import 'package:helper_frontend/domain/usecases/accounts_usecase.dart';
 
 class HomePageState extends ChangeNotifier {
@@ -36,10 +37,15 @@ class HomePageState extends ChangeNotifier {
   //   }
   // }
 
+  List<Account> accounts = [];
+
   Future<void> loadAccounts() async {
     final result = await accountsUsecase.loadAccounts();
-
-    output = 'Contas carregadas: ${result.length}';
+    accounts = result;
     notifyListeners();
+  }
+
+  void focusAccountWindow(int processId) {
+    accountsUsecase.focusAccountWindow(processId);
   }
 }

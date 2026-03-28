@@ -20,7 +20,7 @@ class DashDrawer extends StatelessWidget {
                   (e) => ListTile(
                     title: Text(e.name.toUpperCase()),
                     onTap: () =>
-                        state.changePage(DashboardEnum.values.indexOf(e)),
+                        state.changePage(DashboardEnum.values.indexOf(e) - 1),
                   ),
                 )
                 .toList(),

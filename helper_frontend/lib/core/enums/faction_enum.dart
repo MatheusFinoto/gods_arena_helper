@@ -1,3 +1,5 @@
+import '../constants/assets_constants.dart';
+
 enum FactionEnum { unknown, athens, sparta }
 
 extension FactionEnumExtension on FactionEnum {
@@ -20,6 +22,17 @@ extension FactionEnumExtension on FactionEnum {
         return FactionEnum.sparta;
       default:
         return FactionEnum.unknown;
+    }
+  }
+
+  String get assetPath {
+    switch (this) {
+      case FactionEnum.athens:
+        return AssetsConstants.athens;
+      case FactionEnum.sparta:
+        return AssetsConstants.sparta;
+      case FactionEnum.unknown:
+        return AssetsConstants.athens;
     }
   }
 }

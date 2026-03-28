@@ -1,38 +1,58 @@
 import json
 import sys
-from domain.entities.account import Account
-from domain.enums.faction import Faction
+
+from application.accounts_service import focus_account_window, load_accounts
 
 
-def build_sample_account() -> Account:
-    """Temporary sample entity until OCR fills these values dynamically."""
-    return Account(
-        nick="SampleNick",
-        faction=Faction.UNKNOWN,
-    )
+def _emit_json(payload: dict) -> None:
+    sys.stdout.write(json.dumps(payload, ensure_ascii=False))
 
 
-
-
-def load_accounts():
-    return [build_sample_account()]
-
-
-def load_accounts_json() -> str:
-    return json.dumps(
-        [account.to_dict() for account in load_accounts()],
-        ensure_ascii=False,
-    )
+def _emit_error(message: str, exit_code: int = 1) -> None:
+    print(message, file=sys.stderr)
+    raise SystemExit(exit_code)
 
 
 def main() -> None:
-    command = sys.argv[1] if len(sys.argv) > 1 else "load_accounts"
+    if len(sys.argv) < 2:
+        _emit_error("Missing command.")
+
+    command = sys.argv[1]
 
     if command == "load_accounts":
-        print(load_accounts_json())
+        _emit_json(
+            {
+                "ok": True,
+                "data": [account.to_dict() for account in load_accounts()],
+            }
+        )
         return
 
-    raise ValueError(f"Unknown command: {command}")
+    if command == "focus_account_window":
+        if len(sys.argv) < 3:
+            _emit_error("Usage: python main.py focus_account_window <process_id>")
+
+        try:
+            process_id = int(sys.argv[2])
+        except ValueError:
+            _emit_error("Invalid process ID. It must be an integer.")
+
+        success = focus_account_window(process_id)
+        _emit_json(
+            {
+                "ok": success,
+                "data": {
+                    "processId": process_id,
+                    "focused": success,
+                },
+                "error": None if success else f"Failed to focus window with PID {process_id}.",
+            }
+        )
+        if not success:
+            raise SystemExit(1)
+        return
+
+    _emit_error(f"Unknown command: {command}")
 
 
 if __name__ == "__main__":

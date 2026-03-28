@@ -18,7 +18,12 @@ class DashboardView extends StatelessWidget {
             body: Row(
               children: [
                 DashDrawer(),
-                Expanded(child: PageView(children: const [HomePage()])),
+                Expanded(
+                  child: PageView(
+                    controller: state.pageController,
+                    children: const [HomePage()],
+                  ),
+                ),
               ],
             ),
           );
