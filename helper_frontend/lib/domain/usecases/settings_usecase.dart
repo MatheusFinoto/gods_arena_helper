@@ -2,16 +2,25 @@ import 'package:helper_frontend/core/constants/shared_preferences_constants.dart
 import 'package:helper_frontend/domain/entities/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../service/py_command_service.dart';
+
 abstract class SettingsUsecase {
   Future<AppSettings> loadSettings();
   Future<void> saveGamePath(String gamePath);
   Future<void> saveDarkThemeEnabled(bool value);
   Future<void> saveBetterSearchEnabled(bool value);
+  Future<void> runBetterSearch({required String gamePath});
 }
 
-SettingsUsecase newSettingsUsecase() => _SettingsUsecase();
+SettingsUsecase newSettingsUsecase({
+  required PyCommandService pyCommandService,
+}) => _SettingsUsecase(pyCommandService: pyCommandService);
 
 class _SettingsUsecase implements SettingsUsecase {
+  final PyCommandService pyCommandService;
+
+  _SettingsUsecase({required this.pyCommandService});
+
   Future<SharedPreferences> _sharedPreferences() {
     return SharedPreferences.getInstance();
   }
@@ -58,6 +67,14 @@ class _SettingsUsecase implements SettingsUsecase {
     await prefs.setBool(
       SharedPreferencesConstants.isBetterSearchEnabled,
       value,
+    );
+  }
+
+  @override
+  Future<void> runBetterSearch({required String gamePath}) async {
+    await pyCommandService.runPythonCommand(
+      method: 'run_better_search',
+      arguments: [gamePath],
     );
   }
 }

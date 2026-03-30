@@ -2,6 +2,7 @@ import json
 import sys
 
 from application.accounts_service import focus_account_window, load_accounts
+from application.better_search_service import run_better_search
 
 
 def _emit_json(payload: dict) -> None:
@@ -18,6 +19,18 @@ def main() -> None:
         _emit_error("Missing command.")
 
     command = sys.argv[1]
+
+    if(command == "run_better_search"):
+        game_path = sys.argv[2] if len(sys.argv) >= 3 else None
+        success = run_better_search(game_path)
+        _emit_json(
+            {
+                "ok": success,
+                "data": None,
+                "error": None if success else "Failed to run BetterSearch.",
+            }
+        )
+        return
 
     if command == "load_accounts":
         _emit_json(

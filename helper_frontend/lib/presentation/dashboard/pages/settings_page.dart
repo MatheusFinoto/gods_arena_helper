@@ -74,8 +74,6 @@ class SettingsPage extends StatelessWidget {
                               hasConfiguredGamePath:
                                   state.hasConfiguredGamePath,
                               isDarkThemeEnabled: state.isDarkThemeEnabled,
-                              isBetterSearchEnabled:
-                                  state.isBetterSearchEnabled,
                             ),
                             const SizedBox(height: 24),
                             Container(
@@ -210,17 +208,22 @@ class SettingsPage extends StatelessWidget {
                                   _SectionCard(
                                     title: 'BetterSearch',
                                     subtitle:
-                                        'Controle a preferencia da funcionalidade '
-                                        'que futuramente alterara arquivos do jogo.',
-                                    child: _SettingToggleTile(
+                                        'Use este botao para aplicar as '
+                                        'melhorias do BetterSearch nos arquivos '
+                                        'do jogo de forma simples e rapida.',
+                                    child: _SettingActionTile(
                                       icon: Icons.travel_explore_rounded,
-                                      title: 'Ativar BetterSearch',
+                                      title: 'Executar BetterSearch',
                                       description:
-                                          'Nenhuma alteracao real no jogo sera '
-                                          'feita agora. Esta chave apenas salva a '
-                                          'preferencia do usuario.',
-                                      value: state.isBetterSearchEnabled,
-                                      onChanged: state.toggleBetterSearch,
+                                          'Encontre os NPCs de forma mais Facil',
+                                      buttonLabel: state.isRunningBetterSearch
+                                          ? 'Executando...'
+                                          : 'Executar agora',
+                                      onPressed:
+                                          state.isLoading ||
+                                              state.isRunningBetterSearch
+                                          ? null
+                                          : state.runBetterSearch,
                                     ),
                                   ),
                                   if (state.feedbackMessage != null) ...[
@@ -279,12 +282,10 @@ class _SettingsHero extends StatelessWidget {
   const _SettingsHero({
     required this.hasConfiguredGamePath,
     required this.isDarkThemeEnabled,
-    required this.isBetterSearchEnabled,
   });
 
   final bool hasConfiguredGamePath;
   final bool isDarkThemeEnabled;
-  final bool isBetterSearchEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -393,7 +394,9 @@ class _SettingsHero extends StatelessWidget {
                     const SizedBox(height: 8),
                     _SummaryLine(
                       label: 'BetterSearch',
-                      value: isBetterSearchEnabled ? 'Ativo' : 'Inativo',
+                      value: hasConfiguredGamePath
+                          ? 'Pronto'
+                          : 'Aguardando path',
                     ),
                   ],
                 ),
@@ -548,6 +551,86 @@ class _SettingToggleTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingActionTile extends StatelessWidget {
+  const _SettingActionTile({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final String buttonLabel;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isDark
+            ? ThemeColorsConstants.panelInnerDark
+            : ThemeColorsConstants.panelInnerLight,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? ThemeColorsConstants.innerBorderDark
+              : ThemeColorsConstants.innerBorderLight,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: ThemeColorsConstants.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: ThemeColorsConstants.primary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isDark
+                        ? ThemeColorsConstants.mutedTextDark
+                        : ThemeColorsConstants.mutedTextLight,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          FilledButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: Text(buttonLabel),
+          ),
         ],
       ),
     );

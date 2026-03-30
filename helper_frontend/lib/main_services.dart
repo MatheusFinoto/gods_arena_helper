@@ -3,10 +3,16 @@ import 'package:helper_frontend/domain/usecases/settings_usecase.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'service/py_command_service.dart';
+
 class MainServices {
   static List<SingleChildWidget> mountProvider() {
-    final AccountsUsecase accountUsecase = newAccountsUsecase();
-    final SettingsUsecase settingsUsecase = newSettingsUsecase();
+    final PyCommandService pyCommandService = newPyCommandService();
+
+    final AccountsUsecase accountUsecase = newAccountsUsecase(
+      pyCommandService: pyCommandService,
+    );
+    final SettingsUsecase settingsUsecase = newSettingsUsecase(pyCommandService: pyCommandService,);
 
     return [
       Provider<AccountsUsecase>(create: (_) => accountUsecase),

@@ -17,7 +17,7 @@ class SettingsState extends ChangeNotifier {
 
   bool isLoading = true;
   bool isSavingGamePath = false;
-  bool isBetterSearchEnabled = false;
+  bool isRunningBetterSearch = false;
   String savedGamePath = '';
   String? feedbackMessage;
 
@@ -34,7 +34,6 @@ class SettingsState extends ChangeNotifier {
       final AppSettings settings = await settingsUsecase.loadSettings();
       savedGamePath = settings.gamePath.trim();
       gamePathController.text = savedGamePath;
-      isBetterSearchEnabled = settings.isBetterSearchEnabled;
       feedbackMessage = null;
     } catch (_) {
       feedbackMessage = 'Nao foi possivel carregar as configuracoes.';
@@ -78,17 +77,29 @@ class SettingsState extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleBetterSearch(bool value) async {
-    final previousValue = isBetterSearchEnabled;
-    isBetterSearchEnabled = value;
+  Future<void> runBetterSearch() async {
+    if (isRunningBetterSearch) return;
+    if (!hasConfiguredGamePath) {
+      feedbackMessage =
+          'Configure o path do jogo antes de executar o BetterSearch.';
+      notifyListeners();
+      return;
+    }
+
+    isRunningBetterSearch = true;
     feedbackMessage = null;
     notifyListeners();
 
     try {
-      await settingsUsecase.saveBetterSearchEnabled(value);
+      await settingsUsecase.runBetterSearch(gamePath: savedGamePath);
+      feedbackMessage = 'BetterSearch executado com sucesso.';
+    } on UnimplementedError {
+      feedbackMessage =
+          'A integracao Python do BetterSearch ainda nao foi implementada.';
     } catch (_) {
-      isBetterSearchEnabled = previousValue;
-      feedbackMessage = 'Nao foi possivel salvar o BetterSearch.';
+      feedbackMessage = 'Nao foi possivel executar o BetterSearch.';
+    } finally {
+      isRunningBetterSearch = false;
       notifyListeners();
     }
   }
