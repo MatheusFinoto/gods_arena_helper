@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:helper_frontend/core/constants/theme_colors_constants.dart';
 import 'package:helper_frontend/domain/entities/account.dart';
 import 'package:helper_frontend/domain/usecases/accounts_usecase.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +18,9 @@ class HomePage extends StatelessWidget {
       create: (ctx) =>
           HomePageState(accountsUsecase: ctx.read<AccountsUsecase>()),
       child: Consumer<HomePageState>(
-        builder: (_, state, __) {
+        builder: (context, state, __) {
+          final theme = Theme.of(context);
+          final isDark = theme.brightness == Brightness.dark;
           final athensCount = state.accounts
               .where((account) => account.faction == FactionEnum.athens)
               .length;
@@ -26,18 +29,25 @@ class HomePage extends StatelessWidget {
               .length;
 
           return Scaffold(
-            backgroundColor: const Color(0xFFF3F7FB),
+            backgroundColor: isDark
+                ? ThemeColorsConstants.backgroundDark
+                : ThemeColorsConstants.backgroundLight,
             body: Stack(
               children: [
-                const Positioned(
+                Positioned(
                   top: -120,
                   right: -40,
                   child: _BlurredAccent(color: Color(0xFF4F7CFF), size: 300),
                 ),
-                const Positioned(
+                Positioned(
                   bottom: -120,
                   left: -80,
-                  child: _BlurredAccent(color: Color(0xFF73C8FF), size: 280),
+                  child: _BlurredAccent(
+                    color: isDark
+                        ? ThemeColorsConstants.heroMiddle
+                        : ThemeColorsConstants.primarySoft,
+                    size: 280,
+                  ),
                 ),
                 SafeArea(
                   child: LayoutBuilder(
@@ -72,7 +82,9 @@ class HomePage extends StatelessWidget {
                                       subtitle: 'Janelas prontas para foco',
                                       icon: Icons.groups_rounded,
                                       iconColor: const Color(0xFF1E6BFF),
-                                      backgroundColor: Colors.white,
+                                      backgroundColor: isDark
+                                          ? ThemeColorsConstants.panelCardDark
+                                          : Colors.white,
                                     ),
                                     _StatCard(
                                       width: isCompact
@@ -83,7 +95,9 @@ class HomePage extends StatelessWidget {
                                       subtitle: 'Personagens dessa faccao',
                                       icon: Icons.shield_moon_rounded,
                                       iconColor: const Color(0xFF3F8CFF),
-                                      backgroundColor: Colors.white,
+                                      backgroundColor: isDark
+                                          ? ThemeColorsConstants.panelCardDark
+                                          : Colors.white,
                                     ),
                                     _StatCard(
                                       width: isCompact
@@ -94,7 +108,9 @@ class HomePage extends StatelessWidget {
                                       subtitle: 'Personagens dessa faccao',
                                       icon: Icons.gpp_good_rounded,
                                       iconColor: const Color(0xFF1E9B8A),
-                                      backgroundColor: Colors.white,
+                                      backgroundColor: isDark
+                                          ? ThemeColorsConstants.panelCardDark
+                                          : Colors.white,
                                     ),
                                   ],
                                 ),
@@ -290,6 +306,8 @@ class _AccountsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final headerActions = Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -306,14 +324,22 @@ class _AccountsPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: isDark
+            ? ThemeColorsConstants.panelContainerDark.withOpacity(0.94)
+            : Colors.white.withOpacity(0.92),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE4ECF7)),
-        boxShadow: const [
+        border: Border.all(
+          color: isDark
+              ? ThemeColorsConstants.borderDark
+              : ThemeColorsConstants.borderLight,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x120F172A),
+            color: isDark
+                ? const Color(0x55000000)
+                : const Color(0x120F172A),
             blurRadius: 28,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -321,7 +347,7 @@ class _AccountsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isCompact) ...[
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -329,13 +355,18 @@ class _AccountsPanel extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   'Acesse rapidamente qualquer personagem ativo.',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                  style: TextStyle(
+                    color: isDark
+                        ? ThemeColorsConstants.mutedTextDark
+                        : ThemeColorsConstants.mutedTextLight,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -344,7 +375,7 @@ class _AccountsPanel extends StatelessWidget {
           ] else
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -353,14 +384,16 @@ class _AccountsPanel extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
                         'Acesse rapidamente qualquer personagem ativo.',
                         style: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: isDark
+                              ? ThemeColorsConstants.mutedTextDark
+                              : ThemeColorsConstants.mutedTextLight,
                           fontSize: 14,
                         ),
                       ),
@@ -412,21 +445,31 @@ class _EmptyAccountsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       key: const ValueKey('empty-accounts'),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FBFF),
+        color: isDark
+            ? ThemeColorsConstants.panelInnerDark
+            : ThemeColorsConstants.panelInnerLight,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE5EEF9)),
+        border: Border.all(
+          color: isDark
+              ? ThemeColorsConstants.innerBorderDark
+              : ThemeColorsConstants.innerBorderLight,
+        ),
       ),
       child: Column(
         children: [
           Container(
             width: 72,
             height: 72,
-            decoration: const BoxDecoration(
-              color: Color(0xFFEAF2FF),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? ThemeColorsConstants.infoSurfaceDark
+                  : const Color(0xFFEAF2FF),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -436,21 +479,23 @@ class _EmptyAccountsState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
+          Text(
             'Nenhuma conta encontrada',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Atualize a lista quando o jogo estiver aberto para localizar '
             'suas janelas automaticamente.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF64748B),
+              color: isDark
+                  ? ThemeColorsConstants.mutedTextDark
+                  : ThemeColorsConstants.mutedTextLight,
               fontSize: 14,
               height: 1.5,
             ),
@@ -516,9 +561,15 @@ class _AccountCard extends StatelessWidget {
           key: ValueKey(account.processId),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFDFEFF),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? ThemeColorsConstants.panelCardDark
+                : ThemeColorsConstants.panelCardLight,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE6EDF7)),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? ThemeColorsConstants.cardBorderDark
+                  : ThemeColorsConstants.cardBorderLight,
+            ),
           ),
           child: isCompact
               ? Column(
@@ -547,8 +598,14 @@ class _AccountCard extends StatelessWidget {
                         _InfoChip(
                           icon: Icons.badge_outlined,
                           label: 'PID ${account.processId}',
-                          foregroundColor: const Color(0xFF334155),
-                          backgroundColor: const Color(0xFFF1F5F9),
+                          foregroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? ThemeColorsConstants.infoTextDark
+                              : const Color(0xFF334155),
+                          backgroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? ThemeColorsConstants.infoSurfaceDark
+                              : const Color(0xFFF1F5F9),
                         ),
                         _InfoChip(
                           icon: Icons.shield_outlined,
@@ -600,8 +657,16 @@ class _AccountCard extends StatelessWidget {
                               _InfoChip(
                                 icon: Icons.badge_outlined,
                                 label: 'PID ${account.processId}',
-                                foregroundColor: const Color(0xFF334155),
-                                backgroundColor: const Color(0xFFF1F5F9),
+                                foregroundColor:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? ThemeColorsConstants.infoTextDark
+                                    : const Color(0xFF334155),
+                                backgroundColor:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? ThemeColorsConstants.infoSurfaceDark
+                                    : const Color(0xFFF1F5F9),
                               ),
                               _InfoChip(
                                 icon: Icons.shield_outlined,
@@ -643,16 +708,22 @@ class _AvailabilityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F6FF),
+        color: isDark
+            ? ThemeColorsConstants.infoSurfaceDark
+            : ThemeColorsConstants.infoSurfaceLight,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         '$total disponiveis',
-        style: const TextStyle(
-          color: Color(0xFF1E40AF),
+        style: TextStyle(
+          color: isDark
+              ? ThemeColorsConstants.infoTextDark
+              : ThemeColorsConstants.infoTextLight,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -671,6 +742,8 @@ class _PrivacyToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
@@ -678,13 +751,21 @@ class _PrivacyToggle extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: enabled
-              ? const Color(0xFFE8F0FF)
-              : const Color(0xFFF8FAFC),
+              ? (isDark
+                    ? ThemeColorsConstants.infoSurfaceDark
+                    : const Color(0xFFE8F0FF))
+              : (isDark
+                    ? ThemeColorsConstants.panelInnerDark
+                    : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: enabled
-                ? const Color(0xFFC9DBFF)
-                : const Color(0xFFE2E8F0),
+                ? (isDark
+                      ? ThemeColorsConstants.infoBorderDark
+                      : const Color(0xFFC9DBFF))
+                : (isDark
+                      ? ThemeColorsConstants.innerBorderDark
+                      : const Color(0xFFE2E8F0)),
           ),
         ),
         child: Row(
@@ -694,16 +775,24 @@ class _PrivacyToggle extends StatelessWidget {
               enabled ? Icons.visibility_off_rounded : Icons.visibility_rounded,
               size: 18,
               color: enabled
-                  ? const Color(0xFF1E40AF)
-                  : const Color(0xFF475569),
+                  ? (isDark
+                        ? ThemeColorsConstants.infoTextDark
+                        : const Color(0xFF1E40AF))
+                  : (isDark
+                        ? ThemeColorsConstants.mutedTextDark
+                        : const Color(0xFF475569)),
             ),
             const SizedBox(width: 8),
             Text(
               enabled ? 'Blur para print' : 'Mostrar nicks',
               style: TextStyle(
                 color: enabled
-                    ? const Color(0xFF1E40AF)
-                    : const Color(0xFF334155),
+                    ? (isDark
+                          ? ThemeColorsConstants.infoTextDark
+                          : const Color(0xFF1E40AF))
+                    : (isDark
+                          ? Colors.white
+                          : const Color(0xFF334155)),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -729,10 +818,12 @@ class _SensitiveText extends StatelessWidget {
       text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF0F172A),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : const Color(0xFF0F172A),
       ),
     );
 
@@ -841,18 +932,26 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE4ECF7)),
-        boxShadow: const [
+        border: Border.all(
+          color: isDark
+              ? ThemeColorsConstants.borderDark
+              : ThemeColorsConstants.borderLight,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0D0F172A),
+            color: isDark
+                ? const Color(0x33000000)
+                : const Color(0x0D0F172A),
             blurRadius: 18,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -871,16 +970,18 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
+            style: TextStyle(
+              color: isDark
+                  ? ThemeColorsConstants.mutedTextDark
+                  : ThemeColorsConstants.mutedTextLight,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFF0F172A),
+            style: TextStyle(
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
               fontSize: 30,
               fontWeight: FontWeight.w800,
             ),
@@ -888,8 +989,10 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: Color(0xFF94A3B8),
+            style: TextStyle(
+              color: isDark
+                  ? ThemeColorsConstants.mutedTextDark
+                  : const Color(0xFF94A3B8),
               fontSize: 13,
               height: 1.4,
             ),
