@@ -58,8 +58,7 @@ class DashDrawer extends StatelessWidget {
                       itemBuilder: (_, index) {
                         final page = DashboardEnum.values[index];
                         final available = state.isPageAvailable(page);
-                        final selected =
-                            available && state.currentPageIndex == index;
+                        final selected = available && state.currentPage == page;
 
                         return _DrawerItem(
                           title: page.label,
@@ -67,9 +66,7 @@ class DashDrawer extends StatelessWidget {
                           icon: page.icon,
                           isSelected: selected,
                           isAvailable: available,
-                          onTap: available
-                              ? () => state.changePage(index)
-                              : null,
+                          onTap: available ? () => state.changePage(page) : null,
                         );
                       },
                     ),

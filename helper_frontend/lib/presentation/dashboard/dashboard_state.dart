@@ -6,20 +6,30 @@ class DashboardState extends ChangeNotifier {
 
   DashboardState(this.context);
 
-  PageController pageController = PageController();
-  int currentPageIndex = 0;
-  final int availablePagesCount = 1;
+  final PageController pageController = PageController();
+  final List<DashboardEnum> availablePages = const [
+    DashboardEnum.home,
+    DashboardEnum.settings,
+  ];
+  DashboardEnum currentPage = DashboardEnum.home;
 
-  void changePage(int index) {
-    if (index < 0 || index >= availablePagesCount) return;
+  void changePage(DashboardEnum page) {
+    final index = availablePages.indexOf(page);
+    if (index == -1) return;
 
-    currentPageIndex = index;
+    currentPage = page;
     pageController.jumpToPage(index);
     notifyListeners();
   }
 
+  void syncPage(int index) {
+    if (index < 0 || index >= availablePages.length) return;
+
+    currentPage = availablePages[index];
+    notifyListeners();
+  }
+
   bool isPageAvailable(DashboardEnum page) {
-    final index = DashboardEnum.values.indexOf(page);
-    return index >= 0 && index < availablePagesCount;
+    return availablePages.contains(page);
   }
 }
