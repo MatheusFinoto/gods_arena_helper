@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:helper_frontend/domain/entities/app_settings.dart';
 import 'package:helper_frontend/domain/usecases/settings_usecase.dart';
+import 'package:helper_frontend/main_state.dart';
 
 class SettingsState extends ChangeNotifier {
   final SettingsUsecase settingsUsecase;
+  final MainState mainState;
 
-  SettingsState({required this.settingsUsecase}) {
+  SettingsState({required this.settingsUsecase, required this.mainState}) {
     gamePathController.addListener(_handleGamePathChange);
+    mainState.addListener(_handleMainStateChange);
     loadSettings();
   }
 
@@ -14,10 +17,11 @@ class SettingsState extends ChangeNotifier {
 
   bool isLoading = true;
   bool isSavingGamePath = false;
-  bool isDarkThemeEnabled = false;
   bool isBetterSearchEnabled = false;
   String savedGamePath = '';
   String? feedbackMessage;
+
+  bool get isDarkThemeEnabled => mainState.isDarkThemeEnabled;
 
   bool get hasConfiguredGamePath => savedGamePath.trim().isNotEmpty;
 
@@ -30,7 +34,6 @@ class SettingsState extends ChangeNotifier {
       final AppSettings settings = await settingsUsecase.loadSettings();
       savedGamePath = settings.gamePath.trim();
       gamePathController.text = savedGamePath;
-      isDarkThemeEnabled = settings.isDarkThemeEnabled;
       isBetterSearchEnabled = settings.isBetterSearchEnabled;
       feedbackMessage = null;
     } catch (_) {
@@ -65,15 +68,11 @@ class SettingsState extends ChangeNotifier {
   }
 
   Future<void> toggleDarkTheme(bool value) async {
-    final previousValue = isDarkThemeEnabled;
-    isDarkThemeEnabled = value;
     feedbackMessage = null;
     notifyListeners();
 
-    try {
-      await settingsUsecase.saveDarkThemeEnabled(value);
-    } catch (_) {
-      isDarkThemeEnabled = previousValue;
+    final success = await mainState.setDarkThemeEnabled(value);
+    if (!success) {
       feedbackMessage = 'Nao foi possivel salvar o tema.';
       notifyListeners();
     }
@@ -98,11 +97,16 @@ class SettingsState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _handleMainStateChange() {
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     gamePathController
       ..removeListener(_handleGamePathChange)
       ..dispose();
+    mainState.removeListener(_handleMainStateChange);
     super.dispose();
   }
 }

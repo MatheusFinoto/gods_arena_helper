@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:helper_frontend/core/constants/theme_constants.dart';
 import 'package:helper_frontend/main_services.dart';
-import 'package:helper_frontend/presentation/dashboard/states/settings_state.dart';
 import 'package:provider/provider.dart';
 
+import 'main_state.dart';
 import 'presentation/dashboard/dashboard_view.dart';
 
 void main() async {
@@ -16,27 +17,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [...MainServices.mountProvider()],
-      child: Selector<SettingsState, bool>(
-        selector: (_, state) => state.isDarkThemeEnabled,
-        builder: (_, isDarkThemeEnabled, __) {
+      providers: [
+        ...MainServices.mountProvider(),
+        ListenableProvider<MainState>(create: (ctx) => MainState(context: ctx)),
+      ],
+      child: Consumer<MainState>(
+        builder: (_, mainState, __) {
           return MaterialApp(
             title: 'Gods Arena Helper',
             debugShowCheckedModeBanner: false,
-            themeMode: isDarkThemeEnabled ? ThemeMode.dark : ThemeMode.light,
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF1E6BFF),
-              ),
-            ),
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF73C8FF),
-                brightness: Brightness.dark,
-              ),
-            ),
+            themeMode: mainState.themeMode,
+            theme: ThemeConstants.lightTheme,
+            darkTheme: ThemeConstants.darkTheme,
             home: const DashboardView(),
           );
         },
