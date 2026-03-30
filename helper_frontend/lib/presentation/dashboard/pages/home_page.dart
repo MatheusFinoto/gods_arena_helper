@@ -1,9 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:helper_frontend/core/constants/dashboard_layout_constants.dart';
 import 'package:helper_frontend/core/constants/theme_colors_constants.dart';
 import 'package:helper_frontend/domain/entities/account.dart';
-import 'package:helper_frontend/domain/usecases/accounts_usecase.dart';
+import 'package:helper_frontend/main_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/enums/faction_enum.dart';
@@ -15,16 +16,15 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) =>
-          HomePageState(accountsUsecase: ctx.read<AccountsUsecase>()),
-      child: Consumer<HomePageState>(
-        builder: (context, state, __) {
+      create: (_) => HomePageState(),
+      child: Consumer2<MainState, HomePageState>(
+        builder: (context, mainState, state, __) {
           final theme = Theme.of(context);
           final isDark = theme.brightness == Brightness.dark;
-          final athensCount = state.accounts
+          final athensCount = mainState.accounts
               .where((account) => account.faction == FactionEnum.athens)
               .length;
-          final spartaCount = state.accounts
+          final spartaCount = mainState.accounts
               .where((account) => account.faction == FactionEnum.sparta)
               .length;
 
@@ -57,16 +57,19 @@ class HomePage extends StatelessWidget {
                       return Align(
                         alignment: Alignment.topCenter,
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(24),
+                          padding: DashboardLayoutConstants.pagePadding,
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1180),
+                            constraints: const BoxConstraints(
+                              maxWidth: DashboardLayoutConstants.contentMaxWidth,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 _HeroSection(
-                                  totalAccounts: state.accounts.length,
-                                  isLoading: state.isLoading,
-                                  onRefresh: state.loadAccounts,
+                                  totalAccounts: mainState.accounts.length,
+                                  isLoading: mainState.isLoadingAccounts,
+                                  onRefresh: () =>
+                                      mainState.loadAccounts(forceRefresh: true),
                                 ),
                                 const SizedBox(height: 24),
                                 Wrap(
@@ -78,7 +81,7 @@ class HomePage extends StatelessWidget {
                                           ? constraints.maxWidth - 48
                                           : 230,
                                       title: 'Contas conectadas',
-                                      value: '${state.accounts.length}',
+                                      value: '${mainState.accounts.length}',
                                       subtitle: 'Janelas prontas para foco',
                                       icon: Icons.groups_rounded,
                                       iconColor: const Color(0xFF1E6BFF),
@@ -116,6 +119,7 @@ class HomePage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 24),
                                 _AccountsPanel(
+                                  mainState: mainState,
                                   state: state,
                                   isCompact: isCompact,
                                 ),
@@ -299,8 +303,13 @@ class _HeroSection extends StatelessWidget {
 }
 
 class _AccountsPanel extends StatelessWidget {
-  const _AccountsPanel({required this.state, required this.isCompact});
+  const _AccountsPanel({
+    required this.mainState,
+    required this.state,
+    required this.isCompact,
+  });
 
+  final MainState mainState;
   final HomePageState state;
   final bool isCompact;
 
@@ -317,7 +326,7 @@ class _AccountsPanel extends StatelessWidget {
           enabled: state.hideSensitiveData,
           onTap: state.toggleSensitiveDataVisibility,
         ),
-        _AvailabilityBadge(total: state.accounts.length),
+        _AvailabilityBadge(total: mainState.accounts.length),
       ],
     );
 
@@ -407,24 +416,25 @@ class _AccountsPanel extends StatelessWidget {
           const SizedBox(height: 24),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            child: state.accounts.isEmpty
+            child: mainState.accounts.isEmpty
                 ? _EmptyAccountsState(
-                    isLoading: state.isLoading,
-                    onRefresh: state.loadAccounts,
+                    isLoading: mainState.isLoadingAccounts,
+                    onRefresh: () =>
+                        mainState.loadAccounts(forceRefresh: true),
                   )
                 : ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 520),
                     child: ListView.separated(
-                      itemCount: state.accounts.length,
+                      itemCount: mainState.accounts.length,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        final account = state.accounts[index];
+                        final account = mainState.accounts[index];
 
                         return _AccountCard(
                           account: account,
                           hideSensitiveData: state.hideSensitiveData,
                           onOpen: () =>
-                              state.focusAccountWindow(account.processId),
+                              mainState.focusAccountWindow(account.processId),
                         );
                       },
                       separatorBuilder: (_, __) => const SizedBox(height: 14),

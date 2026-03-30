@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:helper_frontend/core/constants/theme_constants.dart';
+import 'package:helper_frontend/domain/usecases/accounts_usecase.dart';
+import 'package:helper_frontend/domain/usecases/settings_usecase.dart';
 import 'package:helper_frontend/main_services.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +21,12 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ...MainServices.mountProvider(),
-        ListenableProvider<MainState>(create: (ctx) => MainState(context: ctx)),
+        ListenableProvider<MainState>(
+          create: (ctx) => MainState(
+            accountsUsecase: ctx.read<AccountsUsecase>(),
+            settingsUsecase: ctx.read<SettingsUsecase>(),
+          ),
+        ),
       ],
       child: Consumer<MainState>(
         builder: (_, mainState, __) {

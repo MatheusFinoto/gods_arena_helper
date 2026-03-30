@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:helper_frontend/core/constants/dashboard_layout_constants.dart';
 import 'package:helper_frontend/core/constants/theme_colors_constants.dart';
 import 'package:helper_frontend/presentation/dashboard/states/settings_state.dart';
 import 'package:provider/provider.dart';
@@ -59,11 +60,13 @@ class SettingsPage extends StatelessWidget {
                 ),
                 SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: DashboardLayoutConstants.pagePadding,
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1080),
+                        constraints: const BoxConstraints(
+                          maxWidth: DashboardLayoutConstants.contentMaxWidth,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
