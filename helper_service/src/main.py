@@ -3,6 +3,7 @@ import sys
 
 from application.accounts_service import focus_account_window, load_accounts
 from application.better_search_service import run_better_search
+from application.auto_ship_serivce import start_auto_ship
 
 
 def _emit_json(payload: dict) -> None:
@@ -19,6 +20,7 @@ def main() -> None:
         _emit_error("Missing command.")
 
     command = sys.argv[1]
+    print(f"Received command: {command}", file=sys.stderr)
 
     if(command == "run_better_search"):
         game_path = sys.argv[2] if len(sys.argv) >= 3 else None
@@ -32,9 +34,16 @@ def main() -> None:
         )
         return
     
-    if(command == "start_auto_ship"):
-        game_path = sys.argv[2] if len(sys.argv) >= 3 else None
-        success = run_better_search(game_path, auto_ship=True)
+    if(command == "auto_ship_start"):
+        if len(sys.argv) < 3:
+            _emit_error("Usage: python main.py auto_ship_start <process_id>")
+
+        try:
+            process_id = int(sys.argv[2])
+        except ValueError:
+            _emit_error("Invalid process ID. It must be an integer.")
+
+        success = start_auto_ship(process_id=process_id)
         _emit_json(
             {
                 "ok": success,

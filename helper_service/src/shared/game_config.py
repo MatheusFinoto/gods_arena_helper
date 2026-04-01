@@ -14,6 +14,9 @@ FACTION_REGION = (0.02, 0.03, 0.04, 0.06)
 
 CONFIDENCE = 0.9
 
+# Pixel relativo a area da janela do jogo.
+# Ajuste conforme a resolucao/layout usado no Gods Arena.
+SEARCH_LABEL_PIXEL = (120, 120)
 
 
 

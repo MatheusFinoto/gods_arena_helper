@@ -1,8 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:helper_frontend/domain/entities/autoship_account_config.dart';
-import 'package:helper_frontend/domain/entities/autoship_event.dart';
 import 'package:helper_frontend/domain/entities/autoship_status.dart';
 import 'package:helper_frontend/domain/usecases/autoship_usecase.dart';
 
@@ -15,7 +11,6 @@ class AutoShipState extends ChangeNotifier {
   final Map<int, AutoShipAccountStatus> _accountStatuses =
       <int, AutoShipAccountStatus>{};
 
-  StreamSubscription<AutoShipEvent>? _runSubscription;
   AutoShipRunState _runState = AutoShipRunState.idle;
   AutoShipStage _currentStage = AutoShipStage.unknown;
   int _currentCycle = 0;
@@ -27,10 +22,10 @@ class AutoShipState extends ChangeNotifier {
   String? get feedbackMessage => _feedbackMessage;
 
   bool get isRunning => _runState == AutoShipRunState.running;
-  bool get isStopping => _runState == AutoShipRunState.stopping;
+  bool get isStopping => false;
   bool get hasSelection => _selectedProcessIds.isNotEmpty;
   int get selectedCount => _selectedProcessIds.length;
-  int get readyCount => _selectedConfigs.length;
+  int get readyCount => selectedCount == 1 ? 1 : 0;
   int get failedCount => _accountStatuses.values
       .where((status) => status.state == AutoShipAccountState.failed)
       .length;
@@ -50,10 +45,10 @@ class AutoShipState extends ChangeNotifier {
 
   bool isSelected(int processId) => _selectedProcessIds.contains(processId);
 
-  bool get canStart => !isRunning && !isStopping && _selectedConfigs.isNotEmpty;
+  bool get canStart => !isRunning;
 
   void toggleSelection(int processId, bool isSelected) {
-    if (isRunning || isStopping) return;
+    if (isRunning) return;
 
     if (isSelected) {
       _selectedProcessIds.add(processId);
@@ -70,7 +65,7 @@ class AutoShipState extends ChangeNotifier {
   }
 
   void selectAll(List<int> processIds) {
-    if (isRunning || isStopping) return;
+    if (isRunning) return;
 
     for (final processId in processIds) {
       _selectedProcessIds.add(processId);
@@ -84,7 +79,7 @@ class AutoShipState extends ChangeNotifier {
   }
 
   void clearSelection() {
-    if (isRunning || isStopping) return;
+    if (isRunning) return;
 
     _selectedProcessIds.clear();
     _accountStatuses.clear();
@@ -92,57 +87,65 @@ class AutoShipState extends ChangeNotifier {
   }
 
   Future<void> startAutoShip() async {
-    if (!canStart) {
-      _feedbackMessage = 'Selecione pelo menos uma conta para iniciar o lote.';
+    if (selectedCount == 0) {
+      _feedbackMessage = 'Selecione uma conta para iniciar o AutoShip.';
       notifyListeners();
       return;
     }
 
-    await _runSubscription?.cancel();
-
-    _currentStage = AutoShipStage.unknown;
-    _currentCycle = 0;
-    _runState = AutoShipRunState.running;
-    _feedbackMessage = 'AutoShip iniciado. Aguardando eventos do servico...';
-
-    for (final processId in _selectedProcessIds) {
-      _accountStatuses[processId] = AutoShipAccountStatus.initial(processId);
+    if (selectedCount > 1) {
+      _feedbackMessage =
+          'Selecione apenas uma conta. O AutoShip simples roda uma por vez.';
+      notifyListeners();
+      return;
     }
 
+    final processId = _selectedProcessIds.first;
+
+    _runState = AutoShipRunState.running;
+    _currentStage = AutoShipStage.guildQuest;
+    _currentCycle = 0;
+    _feedbackMessage = 'Iniciando AutoShip...';
+    _accountStatuses[processId] = AutoShipAccountStatus(
+      processId: processId,
+      state: AutoShipAccountState.running,
+      stage: AutoShipStage.guildQuest,
+      cycle: 0,
+      message: 'Iniciando AutoShip...',
+    );
     notifyListeners();
 
     try {
-      _runSubscription = autoShipUsecase
-          .startAutoShip(accounts: _selectedConfigs)
-          .listen(
-            _applyEvent,
-            onDone: _handleRunCompleted,
-            onError: (Object error) {
-              _runState = AutoShipRunState.failed;
-              _feedbackMessage =
-                  'Falha ao acompanhar o AutoShip: ${error.toString()}';
-              notifyListeners();
-            },
-          );
+      await autoShipUsecase.startAutoShip(processId: processId);
+      _runState = AutoShipRunState.completed;
+      _feedbackMessage = 'AutoShip concluido com sucesso.';
+      _accountStatuses[processId] = AutoShipAccountStatus(
+        processId: processId,
+        state: AutoShipAccountState.completed,
+        stage: AutoShipStage.guildQuest,
+        cycle: 0,
+        message: 'AutoShip concluido com sucesso.',
+      );
     } catch (error) {
       _runState = AutoShipRunState.failed;
-      _feedbackMessage = 'Nao foi possivel iniciar o AutoShip: $error';
-      notifyListeners();
+      _feedbackMessage = 'Falha ao iniciar AutoShip.';
+      _accountStatuses[processId] = AutoShipAccountStatus(
+        processId: processId,
+        state: AutoShipAccountState.failed,
+        stage: AutoShipStage.guildQuest,
+        cycle: 0,
+        message: 'Falha ao iniciar AutoShip.',
+        error: error.toString(),
+      );
     }
-  }
 
-  Future<void> stopAutoShip() async {
-    if (!isRunning) return;
-
-    _runState = AutoShipRunState.stopping;
-    _feedbackMessage = 'Solicitando parada do AutoShip...';
     notifyListeners();
-
-    await autoShipUsecase.stopAutoShip();
   }
+
+  Future<void> stopAutoShip() async {}
 
   void resetExecution() {
-    if (isRunning || isStopping) return;
+    if (isRunning) return;
 
     for (final processId in _selectedProcessIds) {
       _accountStatuses[processId] = AutoShipAccountStatus.initial(processId);
@@ -153,182 +156,5 @@ class AutoShipState extends ChangeNotifier {
     _currentCycle = 0;
     _feedbackMessage = null;
     notifyListeners();
-  }
-
-  void _applyEvent(AutoShipEvent event) {
-    if (event.message != null && event.message!.trim().isNotEmpty) {
-      _feedbackMessage = event.message;
-    }
-
-    if (event.type == AutoShipEventType.error) {
-      _runState = AutoShipRunState.failed;
-      _feedbackMessage = event.error ?? event.message ?? 'Falha no AutoShip.';
-      notifyListeners();
-      return;
-    }
-
-    switch (event.type) {
-      case AutoShipEventType.runStarted:
-        _runState = AutoShipRunState.running;
-        break;
-      case AutoShipEventType.stageStarted:
-        _currentStage = event.stage;
-        if (event.cycle > 0) {
-          _currentCycle = event.cycle;
-        }
-        break;
-      case AutoShipEventType.accountStageStarted:
-        _updateAccountStatus(
-          processId: event.processId,
-          state: AutoShipAccountState.running,
-          stage: event.stage,
-          cycle: event.cycle,
-          message: event.message ?? 'Executando etapa ${event.stage.label}.',
-          clearError: true,
-        );
-        break;
-      case AutoShipEventType.accountStageCompleted:
-        final isFinalStage =
-            event.stage == AutoShipStage.npc1FinalTurnIn && event.cycle >= 3;
-
-        _updateAccountStatus(
-          processId: event.processId,
-          state: isFinalStage
-              ? AutoShipAccountState.completed
-              : AutoShipAccountState.pending,
-          stage: event.stage,
-          cycle: event.cycle,
-          message: event.message ?? 'Etapa concluida com sucesso.',
-          clearError: true,
-        );
-        break;
-      case AutoShipEventType.accountFailed:
-        _updateAccountStatus(
-          processId: event.processId,
-          state: AutoShipAccountState.failed,
-          stage: event.stage,
-          cycle: event.cycle,
-          message: event.message ?? 'Falha durante a execucao.',
-          error: event.error,
-        );
-        break;
-      case AutoShipEventType.runCompleted:
-        _runState = failedCount > 0
-            ? AutoShipRunState.failed
-            : AutoShipRunState.completed;
-        _feedbackMessage =
-            event.message ?? 'AutoShip finalizado para o lote selecionado.';
-        _markRemainingAccountsAsCompleted();
-        break;
-      case AutoShipEventType.runCancelled:
-        _runState = AutoShipRunState.idle;
-        _feedbackMessage = event.message ?? 'AutoShip interrompido.';
-        _markRunningAccountsAsStopped();
-        break;
-      case AutoShipEventType.info:
-      case AutoShipEventType.unknown:
-        break;
-      case AutoShipEventType.error:
-        break;
-    }
-
-    if (event.cycle > 0) {
-      _currentCycle = event.cycle;
-    }
-    if (event.stage != AutoShipStage.unknown) {
-      _currentStage = event.stage;
-    }
-
-    notifyListeners();
-  }
-
-  void _handleRunCompleted() {
-    if (_runState == AutoShipRunState.stopping) {
-      _runState = AutoShipRunState.idle;
-      _feedbackMessage = 'AutoShip interrompido pelo usuario.';
-      _markRunningAccountsAsStopped();
-    } else if (_runState == AutoShipRunState.running) {
-      _runState = failedCount > 0
-          ? AutoShipRunState.failed
-          : AutoShipRunState.completed;
-      _feedbackMessage ??= 'AutoShip finalizado.';
-      _markRemainingAccountsAsCompleted();
-    }
-
-    notifyListeners();
-  }
-
-  void _markRemainingAccountsAsCompleted() {
-    for (final processId in _selectedProcessIds) {
-      final current = _accountStatuses[processId];
-      if (current == null) continue;
-      if (current.state == AutoShipAccountState.failed ||
-          current.state == AutoShipAccountState.completed) {
-        continue;
-      }
-
-      _accountStatuses[processId] = current.copyWith(
-        state: AutoShipAccountState.completed,
-        message: 'Lote concluido para esta conta.',
-      );
-    }
-  }
-
-  void _markRunningAccountsAsStopped() {
-    for (final processId in _selectedProcessIds) {
-      final current = _accountStatuses[processId];
-      if (current == null) continue;
-      if (current.state == AutoShipAccountState.failed ||
-          current.state == AutoShipAccountState.completed) {
-        continue;
-      }
-
-      _accountStatuses[processId] = current.copyWith(
-        state: AutoShipAccountState.stopped,
-        message: 'Execucao interrompida antes da conclusao.',
-      );
-    }
-  }
-
-  void _updateAccountStatus({
-    required int? processId,
-    required AutoShipAccountState state,
-    required AutoShipStage stage,
-    required int cycle,
-    required String message,
-    String? error,
-    bool clearError = false,
-  }) {
-    if (processId == null) return;
-
-    final current =
-        _accountStatuses[processId] ?? AutoShipAccountStatus.initial(processId);
-
-    _accountStatuses[processId] = current.copyWith(
-      state: state,
-      stage: stage == AutoShipStage.unknown ? current.stage : stage,
-      cycle: cycle > 0 ? cycle : current.cycle,
-      message: message,
-      error: error,
-      clearError: clearError,
-    );
-  }
-
-  List<AutoShipAccountConfig> get _selectedConfigs {
-    final configs = <AutoShipAccountConfig>[];
-
-    for (final processId in _selectedProcessIds) {
-      configs.add(AutoShipAccountConfig(processId: processId));
-    }
-
-    configs.sort((a, b) => a.processId.compareTo(b.processId));
-    return configs;
-  }
-
-  @override
-  void dispose() {
-    unawaited(_runSubscription?.cancel());
-    unawaited(autoShipUsecase.stopAutoShip());
-    super.dispose();
   }
 }

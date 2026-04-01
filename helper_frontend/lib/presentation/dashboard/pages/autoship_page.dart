@@ -196,7 +196,7 @@ class _AutoShipHero extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               const Text(
-                'Monte o lote de ship e acompanhe cada PID em tempo real.',
+                'Execute o primeiro passo do ship com um clique.',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 30,
@@ -206,9 +206,8 @@ class _AutoShipHero extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Selecione as contas e deixe a aba pronta para a automacao '
-                'visual do ship em 3 ciclos, incluindo a leitura da bolsa '
-                'antes da entrega final.',
+                'Nesta etapa o AutoShip esta no modo simples: selecione uma '
+                'conta, clique em iniciar e o Python faz foco, search e Guild Quest.',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.80),
                   fontSize: 15,
@@ -307,7 +306,7 @@ class _SelectionPanel extends StatelessWidget {
           _PanelHeader(
             title: 'Selecao de contas',
             subtitle:
-                'Escolha quais PIDs entram no AutoShip. O item da entrega final sera identificado na bolsa durante a execucao.',
+                'Escolha a conta que vai executar o AutoShip simples. Nesta fase, a execucao acontece em apenas um PID por vez.',
             trailing: Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -381,7 +380,7 @@ class _SelectionPanel extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Fluxo v1: guild NPC, NPC 1, NPC 2, troca de cidade, NPC 3, volta para cidade inicial e entrega final no NPC 1. O lote avanca por etapas sincronizadas.',
+              'Fluxo atual: focar a janela do processo, clicar no label de search e clicar no label Guild Quest.',
               style: TextStyle(
                 color: isDark
                     ? ThemeColorsConstants.infoTextDark
@@ -407,7 +406,7 @@ class _SelectionPanel extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Antes do passo final `npc1FinalTurnIn`, o backend devera abrir a bolsa, identificar qual item de ship esta presente e usar esse item automaticamente.',
+              'Quando essa base estiver estavel, evoluimos o backend para os proximos passos do ship sem mudar o botao principal.',
               style: TextStyle(
                 color: isDark
                     ? ThemeColorsConstants.mutedTextDark
@@ -440,7 +439,7 @@ class _ExecutionPanel extends StatelessWidget {
           const _PanelHeader(
             title: 'Execucao do lote',
             subtitle:
-                'Dispare o AutoShip quando os PIDs estiverem prontos. O frontend ja acompanha eventos do backend continuo.',
+                'Dispare o AutoShip simples e aguarde o retorno final do Python.',
           ),
           const SizedBox(height: 22),
           Wrap(
@@ -550,24 +549,14 @@ class _ExecutionPanel extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: state.canStart ? state.startAutoShip : null,
+              onPressed: state.isRunning ? null : state.startAutoShip,
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 18),
               ),
               icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('Iniciar AutoShip'),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: state.isRunning ? state.stopAutoShip : null,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 18),
+              label: Text(
+                state.isRunning ? 'Iniciando...' : 'Iniciar AutoShip',
               ),
-              icon: const Icon(Icons.stop_circle_outlined),
-              label: Text(state.isStopping ? 'Parando...' : 'Parar lote'),
             ),
           ),
           const SizedBox(height: 12),
@@ -583,12 +572,12 @@ class _ExecutionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _ChecklistLine(
-            label: 'Ha pelo menos um PID selecionado',
-            isChecked: state.selectedCount > 0,
+            label: 'Ha exatamente um PID selecionado',
+            isChecked: state.selectedCount == 1,
           ),
           const SizedBox(height: 10),
           _ChecklistLine(
-            label: 'A deteccao do item final sera feita na bolsa',
+            label: 'O Python retorna apenas sucesso ou falha no final',
             isChecked: true,
           ),
           const SizedBox(height: 10),
