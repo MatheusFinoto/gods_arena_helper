@@ -31,6 +31,18 @@ def main() -> None:
             }
         )
         return
+    
+    if(command == "start_auto_ship"):
+        game_path = sys.argv[2] if len(sys.argv) >= 3 else None
+        success = run_better_search(game_path, auto_ship=True)
+        _emit_json(
+            {
+                "ok": success,
+                "data": None,
+                "error": None if success else "Failed to start AutoShip.",
+            }
+        )
+        return
 
     if command == "load_accounts":
         _emit_json(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helper_frontend/presentation/dashboard/dashboard_state.dart';
+import 'package:helper_frontend/presentation/dashboard/pages/autoship_page.dart';
 import 'package:helper_frontend/presentation/dashboard/pages/home_page.dart';
 import 'package:helper_frontend/presentation/dashboard/pages/settings_page.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,11 @@ class DashboardView extends StatelessWidget {
                     controller: state.pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     onPageChanged: state.syncPage,
-                    children: const [HomePage(), SettingsPage()],
+                    children: const [
+                      HomePage(),
+                      AutoShipPage(),
+                      SettingsPage(),
+                    ],
                   ),
                 ),
               ],
