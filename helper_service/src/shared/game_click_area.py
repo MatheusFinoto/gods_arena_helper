@@ -77,8 +77,6 @@ def click_window_pixel(
 
 
 def click_search_label(process_id: int) -> bool:
-
-    x, y = SEARCH_LABEL_PIXEL
     
     window = _get_game_window(process_id)
     if window is None:
