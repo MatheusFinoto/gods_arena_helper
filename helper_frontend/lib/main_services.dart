@@ -1,4 +1,5 @@
 import 'package:helper_frontend/domain/usecases/accounts_usecase.dart';
+import 'package:helper_frontend/domain/usecases/autorace_usecase.dart';
 import 'package:helper_frontend/domain/usecases/autoship_usecase.dart';
 import 'package:helper_frontend/domain/usecases/settings_usecase.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,9 @@ class MainServices {
     final AutoShipUsecase autoShipUsecase = newAutoShipUsecase(
       pyCommandService: pyCommandService,
     );
+    final AutoRaceUsecase autoRaceUsecase = newAutoRaceUsecase(
+      pyCommandService: pyCommandService,
+    );
     final SettingsUsecase settingsUsecase = newSettingsUsecase(
       pyCommandService: pyCommandService,
     );
@@ -23,6 +27,7 @@ class MainServices {
     return [
       Provider<AccountsUsecase>(create: (_) => accountUsecase),
       Provider<AutoShipUsecase>(create: (_) => autoShipUsecase),
+      Provider<AutoRaceUsecase>(create: (_) => autoRaceUsecase),
       Provider<SettingsUsecase>(create: (_) => settingsUsecase),
     ];
   }

@@ -3,6 +3,7 @@ import sys
 
 from application.accounts_service import focus_account_window, load_accounts
 from application.better_search_service import run_better_search
+from application.auto_race_service import start_auto_race
 from application.auto_ship_serivce import start_auto_ship
 
 
@@ -51,6 +52,24 @@ def main() -> None:
                 "error": None if success else "Failed to start AutoShip.",
             }
         )
+        return
+
+    if(command == "auto_race_start"):
+        if len(sys.argv) < 4:
+            _emit_error("Usage: python main.py auto_race_start <process_id> <initial_manual>")
+
+        try:
+            process_id = int(sys.argv[2])
+            initial_manual = int(sys.argv[3])
+        except ValueError:
+            _emit_error("Invalid arguments. process_id and initial_manual must be integers.")
+
+        success = start_auto_race(
+            process_id=process_id,
+            initial_manual=initial_manual,
+        )
+        if not success:
+            raise SystemExit(1)
         return
 
     if command == "load_accounts":

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helper_frontend/presentation/dashboard/dashboard_state.dart';
+import 'package:helper_frontend/presentation/dashboard/pages/autorace_page.dart';
 import 'package:helper_frontend/presentation/dashboard/pages/autoship_page.dart';
 import 'package:helper_frontend/presentation/dashboard/pages/home_page.dart';
 import 'package:helper_frontend/presentation/dashboard/pages/settings_page.dart';
@@ -28,6 +29,7 @@ class DashboardView extends StatelessWidget {
                     children: const [
                       HomePage(),
                       AutoShipPage(),
+                      AutoRacePage(),
                       SettingsPage(),
                     ],
                   ),

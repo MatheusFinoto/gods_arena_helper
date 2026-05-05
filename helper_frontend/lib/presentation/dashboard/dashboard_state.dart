@@ -10,6 +10,7 @@ class DashboardState extends ChangeNotifier {
   final List<DashboardEnum> availablePages = const [
     DashboardEnum.home,
     DashboardEnum.autoship,
+    DashboardEnum.autorace,
     DashboardEnum.settings,
   ];
   DashboardEnum currentPage = DashboardEnum.home;

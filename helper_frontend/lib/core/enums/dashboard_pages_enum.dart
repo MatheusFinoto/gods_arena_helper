@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum DashboardEnum { home, autoship, teams, monsters, runes, settings }
+enum DashboardEnum { home, autoship, autorace, teams, monsters, runes, settings }
 
 extension DashboardEnumExtension on DashboardEnum {
   String get name {
@@ -9,6 +9,8 @@ extension DashboardEnumExtension on DashboardEnum {
         return 'home';
       case DashboardEnum.autoship:
         return 'autoship';
+      case DashboardEnum.autorace:
+        return 'autorace';
       case DashboardEnum.teams:
         return 'teams';
       case DashboardEnum.monsters:
@@ -26,6 +28,8 @@ extension DashboardEnumExtension on DashboardEnum {
         return 'Home';
       case DashboardEnum.autoship:
         return 'AutoShip';
+      case DashboardEnum.autorace:
+        return 'AutoRace';
       case DashboardEnum.teams:
         return 'Teams';
       case DashboardEnum.monsters:
@@ -43,6 +47,8 @@ extension DashboardEnumExtension on DashboardEnum {
         return 'Visao geral das contas conectadas';
       case DashboardEnum.autoship:
         return 'Ship em lote com selecao de PIDs';
+      case DashboardEnum.autorace:
+        return 'Race diaria com retomada por manual';
       case DashboardEnum.teams:
         return 'Monte e organize composicoes';
       case DashboardEnum.monsters:
@@ -60,6 +66,8 @@ extension DashboardEnumExtension on DashboardEnum {
         return Icons.home_rounded;
       case DashboardEnum.autoship:
         return Icons.alt_route_rounded;
+      case DashboardEnum.autorace:
+        return Icons.directions_run_rounded;
       case DashboardEnum.teams:
         return Icons.groups_rounded;
       case DashboardEnum.monsters:
