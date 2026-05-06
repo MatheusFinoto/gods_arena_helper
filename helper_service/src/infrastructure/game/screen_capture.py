@@ -4,7 +4,7 @@ import sys
 from typing import Any
 
 import pygetwindow as gw
-import pyautogui
+import pyautogui 
 from PIL import Image
 
 from domain.entities.game_window import GameWindow
@@ -44,6 +44,12 @@ def safe_locate_in_image(template_path: str, image: Any, confidence: float):
             except pyautogui.ImageNotFoundException:
                 return None
 
+
+def safe_locate_on_screen(image, confidence, region):
+    try:
+        return pyautogui.locateOnScreen(image, confidence=confidence, region=region)
+    except pyautogui.ImageNotFoundException:
+        return None
 
 def get_gw_screen():
     windows = gw.getWindowsWithTitle("Godsarena Online")

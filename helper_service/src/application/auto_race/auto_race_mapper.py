@@ -9,3 +9,6 @@ AUTO_RACE_DEBUG_DIR = AUTO_RACE_ASSETS_DIR / "debug"
 
 
 ROUND_THE_CITY_RACE_LABEL_1 = AUTO_RACE_LABELS_DIR / "round_the_city_race_option_1.png"
+I_WANT_TO_JOIN_THE_RACE_LABEL = AUTO_RACE_LABELS_DIR / "i_want_to_join_the_race.png"
+START_LABEL = AUTO_RACE_LABELS_DIR / "start_label.png"
+HEALTH_MANUAL_RECEIVE_LABEL = AUTO_RACE_LABELS_DIR / "health_manual_received.png"
