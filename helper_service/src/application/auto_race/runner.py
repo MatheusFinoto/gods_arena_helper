@@ -2,8 +2,7 @@ from __future__ import annotations
 
 
 from application.accounts_service import focus_account_window
-from application.auto_race.steps import get_manual, go_to_suburb
-
+from application.auto_race.steps import get_manual, go_to_suburb, run_race
 
 
 
@@ -13,16 +12,6 @@ def run_auto_race(
     initial_manual: int,
     emit,
 ) -> bool:
-    if initial_manual != 0:
-        emit(
-            "failed",
-            "preparing",
-            initial_manual,
-            "Retomada por manual ainda nao foi implementada.",
-            "Por enquanto o primeiro passo implementado e apenas ir para Suburb.",
-        )
-        return False
-
     if not focus_account_window(process_id):
         emit(
             "failed",
@@ -79,56 +68,27 @@ def run_auto_race(
 
     initial_manual = 1
 
-    
-    
+    #! SUCESSO AO PEGAR O MANUAL, A PARTIR DAQUI O BOT JA ESTA PRONTO PARA PEGAR OS PROXIMOS MANUAIS, FALTA APENAS IMPLEMENTAR A LOGICA 
+    #! DE PROCURAR OS LABELS E CLICAR NOS PONTOS CORRETOS PARA PEGAR OS MANUAIS SEGUINTES, POR ENQUANTO VAMOS DEIXAR APENAS COM O PRIMEIRO 
+    # !MANUAL IMPLEMENTADO E DEPOIS VAMOS ADICIONANDO OS PROXIMOS, O QUE ACHAM?
+
+    emit(
+        "running",
+        "pickup_manual",
+        initial_manual,
+        "Manual recebido com sucesso!",
+        None,
+    )
+    if not run_race(process_id, initial_manual):
+        emit(
+            "failed",
+            "pickup_manual",
+            initial_manual,
+            "Falha ao pegar o manual.",
+            "Revise os comandos dentro de _pickup_manual().",
+        )
+        return False
+
+
 
     return True
-
-
-
-# def _click_label_in_game_window(
-#     *,
-#     process_id: int,
-#     label_path: Path,
-#     label_name: str,
-# ) -> bool:
-#     if not label_path.is_file():
-#         print(
-#             f"[AutoRace][Label] Template nao encontrado no disco: {label_path}",
-#             file=sys.stderr,
-#             flush=True,
-#         )
-#         return False
-
-#     window = _get_game_window(process_id)
-#     if window is None:
-#         return False
-
-#     screenshot = pyautogui.screenshot(
-#         region=(window.left, window.top, window.width, window.height)
-#     )
-#     box = safe_locate_in_image(str(label_path), screenshot, LABEL_CONFIDENCE)
-#     if box is None:
-#         print(
-#             f"[AutoRace][Label] Label nao encontrado: {label_name}.",
-#             file=sys.stderr,
-#             flush=True,
-#         )
-#         return False
-
-#     relative_x = int(box.left + box.width / 2)
-#     relative_y = int(box.top + box.height / 2)
-#     print(
-#         f"[AutoRace][Label] {label_name} encontrado em "
-#         f"x={relative_x}, y={relative_y}.",
-#         file=sys.stderr,
-#         flush=True,
-#     )
-#     return click_window_pixel(x=relative_x, y=relative_y, process_id=process_id)
-
-
-# def _get_game_window(process_id: int):
-#     for window in list_windows_with_title(GAME_WINDOW_TITLE):
-#         if window.process_id == process_id:
-#             return window
-#     return None

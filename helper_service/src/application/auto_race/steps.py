@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import sys
 import time
-from datetime import datetime
-from pathlib import Path
 
 import pyautogui
 
@@ -15,18 +12,11 @@ from infrastructure.game import window_scanner
 from shared.game_click_area import click_window_pixel
 
 
-AUTO_RACE_DEBUG_DIR = (
-    Path(__file__).resolve().parents[2] / "assets" / "auto_race" / "debug"
-)
-
-
 # aqui vamos implementar os steps que quero que seja feito de acordo com a race
 
 
 # STEP DE IR PARA SUBURB
 def go_to_suburb(process_id: int) -> bool:
-    print("[AutoRace] Executando _go_to_suburb().", file=sys.stderr)
-
     pyautogui.press("m")
 
     if not click_window_pixel(x=940, y=200, process_id=process_id):
@@ -38,13 +28,7 @@ def go_to_suburb(process_id: int) -> bool:
 
     pyautogui.press("m")
 
-    print(
-        "[AutoRace] Comandos para Suburb executados. Aguardando chegada.",
-        file=sys.stderr,
-        flush=True,
-    )
-
-    time.sleep(5)
+    time.sleep(actions.NPC_MOVE_TIMERS.get(0))
     return True
 
 def GET_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
@@ -76,6 +60,8 @@ def GET_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
 
 def get_manual(process_id: int) -> bool:
     FINISHED = False
+    attempts = 0
+    max_attempts_before_restart = 5
 
     if not actions.click_npc_for_manual(process_id=process_id, manual=0):
         return False
@@ -83,13 +69,123 @@ def get_manual(process_id: int) -> bool:
     while not FINISHED:
         current_step = GET_MANUAL_LABELS_BOX(process_id)
 
-        if current_step is not None:
-            if current_step.field == "success_get_manual":
-                FINISHED = actions.doStepSuccessGetManual(process_id, current_step)
+        if current_step is None:
+            attempts += 1
 
-            actions.switch_field_get_manual(process_id, current_step)
-           
+            if attempts >= max_attempts_before_restart:
+                if not actions.click_npc_for_manual(process_id=process_id, manual=0):
+                    return False
+                attempts = 0
 
+ 
+            continue
+
+        action_success = actions.switch_field_get_manual(process_id, current_step)
+        if not action_success:
+            attempts += 1
+            if attempts >= max_attempts_before_restart:
+                if not actions.click_npc_for_manual(process_id=process_id, manual=0):
+                    return False
+                attempts = 0
+            continue
+
+        attempts = 0
+
+        if current_step.field == "success_get_manual" and action_success:
+            FINISHED = True
+ 
     return FINISHED
 
 
+
+##! ======================================================================================================================================
+
+def RESOLVE_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
+    window = window_scanner.get_game_window(process_id)
+    if window is None:
+        return None
+
+    screenshot = capture_window_region(window, (0, 0, 1, 1))
+    confidence = AR_MAPPER.CONFIDENCE
+    fields = [
+        ("round_the_city_race_option", AR_MAPPER.ROUND_THE_CITY_RACE_LABEL, (-170, -30)),
+        ("turn_in_a_health_manual", AR_MAPPER.TURN_IN_A_HELTH_MANUAL, (-170, 0)),
+        ("resolve_question", AR_MAPPER.RESOLVE_QUESTION, (-100, 90)),
+        ("success_resolve_manual", AR_MAPPER.SUCCESS_RESOLVE_MANUAL, (170, 120)),
+    ]
+    
+    for field_name, label_path, offset in fields:
+        box = safe_locate_in_image(str(label_path), screenshot, confidence)
+        if box:
+            center = pyautogui.center(box)
+            return GetManualStep(
+                field=field_name,
+                box=box,
+                mouse_point_click=(int(center.x + offset[0]), int(center.y + offset[1])),
+            )
+
+    return None
+
+
+
+def resolve_manual(process_id: int, manual: int) -> bool:
+    FINISHED = False
+    attempts = 0
+    max_attempts_before_restart = 5
+
+    actions.click_npc_for_manual(process_id=process_id, manual=manual)
+
+    while not FINISHED:
+        current_step = RESOLVE_MANUAL_LABELS_BOX(process_id)
+
+        if current_step is None:
+            attempts += 1
+
+            if attempts >= max_attempts_before_restart:
+                if not actions.click_npc_for_manual(process_id=process_id, manual=0):
+                    return False
+                attempts = 0
+
+ 
+            continue
+
+        action_success = actions.switch_field_resolve_manual(process_id, current_step)
+        if not action_success:
+            attempts += 1
+            if attempts >= max_attempts_before_restart:
+                if not actions.click_npc_for_manual(process_id=process_id, manual=0):
+                    return False
+                attempts = 0
+            continue
+
+        attempts = 0
+
+        if current_step.field == "success_resolve_manual" and action_success:
+            FINISHED = True
+ 
+    return FINISHED
+    
+
+
+
+def run_race(process_id: int, curent_manual: int) -> bool:
+    actions.move_to_npc_for_manual(process_id=process_id, manual=curent_manual)
+    time.sleep(actions.NPC_MOVE_TIMERS.get(curent_manual))
+    resolve_manual(process_id, manual=curent_manual)
+    return True
+
+
+
+
+
+def resolve_manual_1(process_id: int) -> bool:
+    actions.move_to_npc_for_manual(process_id=process_id, manual=1)
+    time.sleep(35)
+    resolve_manual(process_id, manual=1)
+    return True
+
+def resolve_manual_2(process_id: int) -> bool:
+    actions.move_to_npc_for_manual(process_id=process_id, manual=2)
+    time.sleep(5)
+    resolve_manual(process_id, manual=2)
+    return True
