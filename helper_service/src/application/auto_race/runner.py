@@ -67,9 +67,7 @@ def run_auto_race(
         None,
     )
 
-    if not get_manual(
-        process_id=process_id,
-    ):
+    if not get_manual(process_id=process_id):
         emit(
             "failed",
             "pickup_manual",
@@ -79,13 +77,11 @@ def run_auto_race(
         )
         return False
 
-    emit(
-        "completed",
-        "pickup_manual",
-        initial_manual,
-        "NPC inicial clicado e opcao Round-the-city Race selecionada.",
-        None,
-    )
+    initial_manual = 1
+
+    
+    
+
     return True
 
 

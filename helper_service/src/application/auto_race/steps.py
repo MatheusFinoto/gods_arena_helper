@@ -53,7 +53,6 @@ def GET_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
         return None
 
     screenshot = capture_window_region(window, (0, 0, 1, 1))
-    # _save_debug_screenshot(process_id, screenshot, "get_manual_labels_box")
     confidence = AR_MAPPER.CONFIDENCE
     fields = [
         ("round_the_city_race_option_1", AR_MAPPER.ROUND_THE_CITY_RACE_LABEL_1, (-170, 30)),
@@ -75,29 +74,8 @@ def GET_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
     return None
 
 
-def _save_debug_screenshot(process_id: int, screenshot, name: str) -> None:
-    try:
-        AUTO_RACE_DEBUG_DIR.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        path = AUTO_RACE_DEBUG_DIR / f"{name}_pid{process_id}_{timestamp}.png"
-        screenshot.save(path)
-        print(
-            f"[AutoRace][Debug] Screenshot salvo em: {path}",
-            file=sys.stderr,
-            flush=True,
-        )
-    except Exception as exc:
-        print(
-            f"[AutoRace][Debug] Falha ao salvar screenshot: {exc}",
-            file=sys.stderr,
-            flush=True,
-        )
-
-
 def get_manual(process_id: int) -> bool:
     FINISHED = False
-    print("[AutoRace] Executando _get_manual().", file=sys.stderr)
-
 
     if not actions.click_npc_for_manual(process_id=process_id, manual=0):
         return False

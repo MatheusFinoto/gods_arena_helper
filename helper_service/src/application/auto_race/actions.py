@@ -66,3 +66,6 @@ def doStepSuccessGetManual(process_id: int, field: GetManualStep) -> bool:
     x, y = field.mouse_point_click
     click_window_pixel(x, y, process_id=process_id)
     return True
+
+
+
