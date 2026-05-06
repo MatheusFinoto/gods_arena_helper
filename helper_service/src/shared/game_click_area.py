@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import time
 
 import pyautogui
 
@@ -74,6 +75,53 @@ def click_window_pixel(
     # pyautogui.moveTo(target_x, target_y)
     pyautogui.click(target_x, target_y)
     return True
+
+def simple_click_window_pixel(
+    x: int,
+    y: int,
+    process_id: int,
+) -> bool:
+    window = _get_game_window(process_id)
+
+    target_x = int(window.left + x)
+    target_y = int(window.top + y)
+
+    pyautogui.click(target_x, target_y, clicks=1, interval=0.25)
+
+    return True
+
+
+def long_click_window_pixel(
+    x: int,
+    y: int,
+    process_id: int,
+    hold_seconds: float = 0.5,
+) -> bool:
+    window = _get_game_window(process_id)
+
+    target_x = int(window.left + x)
+    target_y = int(window.top + y)
+
+    pyautogui.moveTo(target_x, target_y)
+    pyautogui.mouseDown(target_x, target_y)
+    time.sleep(hold_seconds)
+    pyautogui.mouseUp(target_x, target_y)
+    return True
+
+
+def move_window_pixel(
+    x: int,
+    y: int,
+    process_id: int,
+) -> bool:
+    window = _get_game_window(process_id)
+
+    target_x = int(window.left + x)
+    target_y = int(window.top + y)
+
+    pyautogui.moveTo(target_x, target_y)
+    return True
+
 
 
 def click_search_label(process_id: int) -> bool:

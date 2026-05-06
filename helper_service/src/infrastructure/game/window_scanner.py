@@ -5,6 +5,7 @@ import time
 from ctypes import wintypes
 
 from domain.entities.game_window import GameWindow
+from shared.game_config import GAME_WINDOW_TITLE
 
 user32 = ctypes.windll.user32
 
@@ -128,3 +129,10 @@ def list_windows_with_title(title_fragment: str) -> list[GameWindow]:
 
     user32.EnumWindows(enum_windows_proc, 0)
     return windows
+
+
+def get_game_window(process_id: int):
+    for window in list_windows_with_title(GAME_WINDOW_TITLE):
+        if window.process_id == process_id:
+            return window
+    return None
