@@ -22,52 +22,6 @@ def run_auto_race(
         )
         return False
 
-    emit(
-        "running",
-        "go_to_suburb",
-        initial_manual,
-        "Indo para Suburb.",
-        None,
-    )
-
-    if not go_to_suburb(process_id):
-        emit(
-            "failed",
-            "go_to_suburb",
-            initial_manual,
-            "Falha ao ir para Suburb.",
-            "Revise os comandos dentro de _go_to_suburb().",
-        )
-        return False
-
-    emit(
-        "running",
-        "pickup_manual",
-        initial_manual,
-        "Clicando no NPC inicial.",
-        None,
-    )
-
-    emit(
-        "running",
-        "pickup_manual",
-        initial_manual,
-        "Procurando opcao Round-the-city Race.",
-        None,
-    )
-
-    if not get_manual(process_id=process_id):
-        emit(
-            "failed",
-            "pickup_manual",
-            initial_manual,
-            "Falha ao clicar na opcao Round-the-city Race.",
-            "Template nao encontrado na janela do jogo.",
-        )
-        return False
-
-    initial_manual = 1
-
     #! SUCESSO AO PEGAR O MANUAL, A PARTIR DAQUI O BOT JA ESTA PRONTO PARA PEGAR OS PROXIMOS MANUAIS, FALTA APENAS IMPLEMENTAR A LOGICA 
     #! DE PROCURAR OS LABELS E CLICAR NOS PONTOS CORRETOS PARA PEGAR OS MANUAIS SEGUINTES, POR ENQUANTO VAMOS DEIXAR APENAS COM O PRIMEIRO 
     # !MANUAL IMPLEMENTADO E DEPOIS VAMOS ADICIONANDO OS PROXIMOS, O QUE ACHAM?
@@ -79,16 +33,56 @@ def run_auto_race(
         "Manual recebido com sucesso!",
         None,
     )
-    if not run_race(process_id, initial_manual):
+
+    current_manual = initial_manual
+    while current_manual <= 17:
+        if(current_manual == 0):
+            go_to_suburb(process_id=process_id)
+            emit(
+                "running",
+                "go_to_suburb",
+                initial_manual,
+                "Indo para Suburb.",
+                None,
+            )
+            get_manual(process_id=process_id)
+            current_manual += 1
+            emit(
+                "running",
+                "pickup_manual",
+                current_manual,
+                "Manual 0 recebido com sucesso!",
+                None,
+            )
+
         emit(
-            "failed",
-            "pickup_manual",
-            initial_manual,
-            "Falha ao pegar o manual.",
-            "Revise os comandos dentro de _pickup_manual().",
+            "running",
+            "turn_in_manual",
+            current_manual,
+            f"Executando manual {current_manual}.",
+            None,
         )
-        return False
 
+        if not run_race(process_id, current_manual):
+            emit(
+                "failed",
+                "turn_in_manual",
+                current_manual,
+                f"Falha ao executar o manual {current_manual}.",
+                "Revise os pontos do mapa, clique do NPC ou labels desse manual.",
+            )
+            return False
 
+        current_manual += 1
 
+    emit(
+        "completed",
+        "finish_race",
+        current_manual - 1,
+        "AutoRace concluiu todos os manuais configurados.",
+        None,
+    )
+
+    
+    
     return True

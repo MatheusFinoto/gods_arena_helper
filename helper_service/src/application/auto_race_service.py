@@ -48,7 +48,7 @@ def start_auto_race(process_id: int, initial_manual: int) -> bool:
         stage: str,
         manual: int,
         message: str,
-        error: str | None = None,
+        error: str | None = None, 
     ) -> None:
         _emit_event(
             process_id=process_id,

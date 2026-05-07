@@ -111,7 +111,10 @@ def RESOLVE_MANUAL_LABELS_BOX(process_id: int) -> GetManualStep | None:
         ("round_the_city_race_option", AR_MAPPER.ROUND_THE_CITY_RACE_LABEL, (-170, -30)),
         ("turn_in_a_health_manual", AR_MAPPER.TURN_IN_A_HELTH_MANUAL, (-170, 0)),
         ("resolve_question", AR_MAPPER.RESOLVE_QUESTION, (-100, 90)),
-        ("success_resolve_manual", AR_MAPPER.SUCCESS_RESOLVE_MANUAL, (170, 120)),
+        ("success_resolve_manual", AR_MAPPER.SUCCESS_RESOLVE_MANUAL, (270, 230)),
+        #!! AQUI ELE TA NO NPC 1 NOVAMENTE, MAS PRECISA RESPONDER E NAO PEGAR UM NOVO
+        ("round_the_city_race_option_1", AR_MAPPER.ROUND_THE_CITY_RACE_LABEL_1, (-170, 30)),
+        ("turn_in_a_health_manual_1", AR_MAPPER.I_WANT_TO_JOIN_THE_RACE_LABEL, (-170, 20)),
     ]
     
     for field_name, label_path, offset in fields:
@@ -169,10 +172,19 @@ def resolve_manual(process_id: int, manual: int) -> bool:
 
 
 def run_race(process_id: int, curent_manual: int) -> bool:
-    actions.move_to_npc_for_manual(process_id=process_id, manual=curent_manual)
-    time.sleep(actions.NPC_MOVE_TIMERS.get(curent_manual))
-    resolve_manual(process_id, manual=curent_manual)
-    return True
+    city_destiny = None
+    if(curent_manual == 9):
+        city_destiny = "main"
+
+    if not actions.move_to_npc_for_manual(process_id=process_id, manual=curent_manual, city_destiny=city_destiny):
+        return False
+
+    move_timer = actions.NPC_MOVE_TIMERS.get(curent_manual)
+    if move_timer is None:
+        return False
+
+    time.sleep(move_timer)
+    return resolve_manual(process_id, manual=curent_manual)
 
 
 
