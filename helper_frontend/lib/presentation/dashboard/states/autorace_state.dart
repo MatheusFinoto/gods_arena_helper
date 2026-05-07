@@ -52,8 +52,20 @@ class AutoRaceState extends ChangeNotifier {
 
   bool isSelected(int processId) => _selectedProcessIds.contains(processId);
 
+  AutoRaceAccountStatus statusFor(int processId) {
+    return _accountStatuses[processId] ??
+        AutoRaceAccountStatus.initial(
+          processId,
+          initialManual: initialManualFor(processId),
+        );
+  }
+
   int initialManualFor(int processId) {
     return _initialManualByProcessId[processId] ?? 0;
+  }
+
+  int manualValueFor(int processId) {
+    return statusFor(processId).currentManual.clamp(0, 17).toInt();
   }
 
   void toggleSelection(int processId, bool isSelected) {
@@ -68,7 +80,6 @@ class AutoRaceState extends ChangeNotifier {
       );
     } else {
       _selectedProcessIds.remove(processId);
-      _initialManualByProcessId.remove(processId);
       _accountStatuses.remove(processId);
     }
 
@@ -100,19 +111,22 @@ class AutoRaceState extends ChangeNotifier {
   }
 
   void setInitialManual(int processId, int manual) {
-    if (isRunning || isStopping || !_selectedProcessIds.contains(processId)) {
+    if (isRunning || isStopping) {
       return;
     }
 
     final normalizedManual = manual.clamp(0, 17).toInt();
     _initialManualByProcessId[processId] = normalizedManual;
-    _accountStatuses[processId] =
-        (_accountStatuses[processId] ??
-                AutoRaceAccountStatus.initial(processId))
-            .copyWith(
-              initialManual: normalizedManual,
-              currentManual: normalizedManual,
-            );
+    if (_selectedProcessIds.contains(processId) ||
+        _accountStatuses.containsKey(processId)) {
+      _accountStatuses[processId] =
+          (_accountStatuses[processId] ??
+                  AutoRaceAccountStatus.initial(processId))
+              .copyWith(
+                initialManual: normalizedManual,
+                currentManual: normalizedManual,
+              );
+    }
     notifyListeners();
   }
 
