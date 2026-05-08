@@ -356,6 +356,9 @@ class _AccountSelectionCard extends StatelessWidget {
                     SizedBox(
                       width: 230,
                       child: DropdownButtonFormField<int>(
+                        key: ValueKey(
+                          'autorace-manual-${account.processId}-$manualValue',
+                        ),
                         value: manualValue,
                         isExpanded: true,
                         decoration: const InputDecoration(

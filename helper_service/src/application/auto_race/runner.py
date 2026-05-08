@@ -74,6 +74,14 @@ def run_auto_race(
             return False
 
         current_manual += 1
+        if current_manual <= 17:
+            emit(
+                "running",
+                "pickup_manual",
+                current_manual,
+                f"Manual atual atualizado para {current_manual}.",
+                None,
+            )
 
     emit(
         "completed",
