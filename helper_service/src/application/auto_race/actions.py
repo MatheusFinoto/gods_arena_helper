@@ -21,7 +21,7 @@ NPC_CLICK_POINTS: dict[int, tuple[int, int]] = {
     7: (780, 385), # NPC 3 DONE (MESMO QUE O 1)
     8: (820, 340), # NPC 1 DONE (MESMO QUE O 0)
     9: (840, 440), # NPC 6 DONE
-    10: (799, 280), # NPC 7 DONE
+    10: (749, 282), # NPC 7 DONE
     11: (730, 360), # NPC 9 DONE
     12: (690, 380), # NPC 10 DONE
     13: (730, 360), # NPC 9 DONE (MESMO QUE O 11)
@@ -72,7 +72,7 @@ NPC_MOVE_TIMERS: dict[int, int] = {
     14: 35, # DONE 35
     15: 60, # DONE 
     16: 40, # DONE 
-    17: 90, # DONE 
+    17: 60, # DONE 
 }
 
 def click_npc_for_manual(process_id: int, manual: int) -> bool:
