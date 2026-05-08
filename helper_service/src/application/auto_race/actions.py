@@ -21,15 +21,14 @@ NPC_CLICK_POINTS: dict[int, tuple[int, int]] = {
     7: (780, 385), # NPC 3 DONE (MESMO QUE O 1)
     8: (820, 340), # NPC 1 DONE (MESMO QUE O 0)
     9: (840, 440), # NPC 6 DONE
-    10: (799, 280), # NPC 7
-    #TODO
-    11: (0, 0), # NPC 9
-    12: (0, 0), # NPC 10
-    13: (0, 0), # NPC 9
-    14: (0, 0), # NPC 8
-    15: (0, 0), # NPC 7
-    16: (0, 0), # NPC 6
-    17: (0, 0), # NPC 1
+    10: (799, 280), # NPC 7 DONE
+    11: (730, 360), # NPC 9 DONE
+    12: (690, 380), # NPC 10 DONE
+    13: (730, 360), # NPC 9 DONE (MESMO QUE O 11)
+    14: (765, 320), # NPC 8 DONE
+    15: (749, 282), # NPC 7 DONE
+    16: (840, 440), # NPC 6 DONE
+    17: (799, 385), # NPC 1 DONE
 }
 
 #!! MAPA
@@ -44,15 +43,14 @@ NPC_MAP_POINTS: dict[int, tuple[int, int]] = {
     7: (844, 515), # NPC 3 DONE (MESMO QUE O 1)
     8: (802, 601), # NPC 1 DONE (MESMO QUE O 0)
     9: (887, 560), # NPC 6 DONE
-    10: (835, 646), # NPC 7
-    #TODO
-    11: (778, 482), # NPC 9
-    12: (0, 0), # NPC 10
-    13: (0, 0), # NPC 9
-    14: (0, 0), # NPC 8
-    15: (0, 0), # NPC 7
-    16: (0, 0), # NPC 6
-    17: (0, 0), # NPC 1
+    10: (835, 646), # NPC 7 DONE
+    11: (774, 486), # NPC 9 DONE
+    12: (726, 514), # NPC 10 DONE
+    13: (774, 486), # NPC 9 DONE (MESMO QUE O 11)
+    14: (708, 556), # NPC 8 DONE
+    15: (835, 646), # NPC 7 DONE
+    16: (887, 560), # NPC 6 DONE
+    17: (802, 601), # NPC 1 DONE
 }
 
 #!! TEMPOS DE MOVIMENTO PARA CADA MANUAL, EM SEGUNDOS
@@ -68,14 +66,13 @@ NPC_MOVE_TIMERS: dict[int, int] = {
     8: 35, # DONE 35
     9: 90, # DONE 90
     10: 45, # DONE 45
-    #TODO
-    11: 90, # NPC 9
-    12: 0, # NPC 10
-    13: 0, # NPC 9
-    14: 0, # NPC 8
-    15: 0, # NPC 7
-    16: 0, # NPC 6
-    17: 0, # NPC 1
+    11: 90, # DONE 90
+    12: 30, # DONE 30
+    13: 30, # DONE 30
+    14: 35, # DONE 35
+    15: 60, # DONE 
+    16: 40, # DONE 
+    17: 90, # DONE 
 }
 
 def click_npc_for_manual(process_id: int, manual: int) -> bool:

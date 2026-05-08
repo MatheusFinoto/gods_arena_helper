@@ -176,6 +176,9 @@ def run_race(process_id: int, curent_manual: int) -> bool:
     if(curent_manual == 9):
         city_destiny = "main"
 
+    if(curent_manual == 17):
+        city_destiny = "suburb"
+
     if not actions.move_to_npc_for_manual(process_id=process_id, manual=curent_manual, city_destiny=city_destiny):
         return False
 
