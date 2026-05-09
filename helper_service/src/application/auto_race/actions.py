@@ -21,7 +21,7 @@ NPC_CLICK_POINTS: dict[int, tuple[int, int]] = {
     7: (780, 385), # NPC 3 DONE (MESMO QUE O 1)
     8: (820, 340), # NPC 1 DONE (MESMO QUE O 0)
     9: (840, 440), # NPC 6 DONE
-    10: (749, 282), # NPC 7 DONE
+    10: (789, 270), # NPC 7 DONE
     11: (730, 360), # NPC 9 DONE
     12: (690, 380), # NPC 10 DONE
     13: (730, 360), # NPC 9 DONE (MESMO QUE O 11)
